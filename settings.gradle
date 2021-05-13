@@ -1,0 +1,6 @@
+include ':app'
+rootProject.name = "RoutetKit"
+include ':annotation'
+include ':plugin'
+include ':router'
+include ':compiler'
