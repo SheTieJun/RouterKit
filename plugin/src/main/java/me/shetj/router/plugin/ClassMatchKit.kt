@@ -27,7 +27,7 @@ object ClassMatchKit {
 
 
     fun isMatchFile(name: String): Boolean {
-        println(name)
+//        println(name)
         return name.startsWith(DEF_ROUTER_FILE)
     }
 

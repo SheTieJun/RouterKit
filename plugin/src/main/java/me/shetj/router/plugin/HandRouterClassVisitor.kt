@@ -8,7 +8,7 @@ import org.objectweb.asm.Opcodes
 /**
  * 处理类
  */
-class HandRouterClassVisitor(private val routerMap:HashMap<String,String>,classVisitor: ClassVisitor): ClassVisitor(Opcodes.ASM7,classVisitor), Opcodes {
+class HandRouterClassVisitor(private val routerMap:HashMap<String,String>,classVisitor: ClassVisitor): ClassVisitor(Opcodes.ASM9,classVisitor), Opcodes {
 
     override fun visitMethod(
         access: Int,
