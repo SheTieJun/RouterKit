@@ -11,7 +11,7 @@ import android.util.Log
  * 1. 初始化
  * 2. 跳转
  */
-class SRouter private constructor() {
+class SRouterKit private constructor() {
 
     companion object {
 
@@ -22,7 +22,7 @@ class SRouter private constructor() {
         var isDebug = false
 
         @Volatile
-        private var sRouter: SRouter? = null
+        private var sRouter: SRouterKit? = null
 
         @JvmStatic
         fun init(context :Context) {
@@ -31,9 +31,9 @@ class SRouter private constructor() {
         }
 
         @JvmStatic
-        fun getInstance(): SRouter {
-            return sRouter ?: synchronized(SRouter::class) {
-                SRouter().also {
+        fun getInstance(): SRouterKit {
+            return sRouter ?: synchronized(SRouterKit::class) {
+                SRouterKit().also {
                     sRouter = it
                 }
             }
@@ -53,7 +53,7 @@ class SRouter private constructor() {
         val classPath = routerMap[path]
         if (classPath.isNullOrBlank()){
             if (isDebug){
-                Log.e(TAG, "startJump: ", )
+                Log.e(TAG, "startJump: can't find path ")
             }
             return
         }
@@ -74,6 +74,9 @@ class SRouter private constructor() {
     fun startJump(path:String){
         val classPath = routerMap[path]
         if (classPath.isNullOrBlank()){
+            if (isDebug){
+                Log.e(TAG, "startJump: can't find path ")
+            }
             return
         }
         Intent().apply {
@@ -90,8 +93,7 @@ class SRouter private constructor() {
      * 利用ASM加载到map
      */
     private  fun loadRouter(){
-
+        this.routerMap.put("test","test")
     }
-
 
 }

@@ -10,6 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RoutetKit"
         android:fullBackupContent="@xml/mybackupscheme">
+        <activity android:name=".Router2Activity"/>
         <activity android:name=".RouterActivity"/>
         <activity android:name=".MainActivity">
             <intent-filter>

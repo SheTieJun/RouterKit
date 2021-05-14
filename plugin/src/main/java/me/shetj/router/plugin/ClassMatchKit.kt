@@ -11,10 +11,24 @@ import java.io.File
  */
 object ClassMatchKit {
 
-    private const val DEF_ROUTER_FILE = "me.shetj.router.SRouter"
+    private const val DEF_ROUTER_FILE = "me.shetj.router.SRouterKit"
+    const val ROUTER = "Lme/shetj/router/SRouterKit;"
     private const val MATCH_ANNOTATION = "Lme/shetj/annotation/SRouter;"
-    fun isMatchFile(root: File, file: File): Boolean {
-        return getClassName(root, file) == DEF_ROUTER_FILE
+
+
+    private val DEFAULT_EXCLUDE = arrayListOf(  "^android\\..*",
+        "^org..*",
+        "^com.google.android..*",
+        "^kotlin..*",
+        "^androidx\\..*",
+        ".*\\.R$",
+        ".*\\.R\\$.*$",
+        ".*\\.BuildConfig$")
+
+
+    fun isMatchFile(name: String): Boolean {
+        println(name)
+        return name.startsWith(DEF_ROUTER_FILE)
     }
 
     fun getClassName(root: File, file: File): String {
@@ -26,7 +40,31 @@ object ClassMatchKit {
             .replace(File.separatorChar.toString(), ".")
     }
 
-    fun isMatchAnnotation(name:String): Boolean {
+    /**
+     * 是否时路由
+     */
+    fun isMatchAnnotation(name: String): Boolean {
         return name == MATCH_ANNOTATION
+    }
+
+
+    /**
+     * 是否忽略
+     */
+    fun isNeedIgClass(file: File): Boolean {
+        val name = file.name
+        return isNeedIgClass(name)
+    }
+
+    fun isNeedIgClass(name: String): Boolean {
+        return !name.endsWith(".class") || name.startsWith("R\$")
+                || "R.class" == name || "BuildConfig.class" == name ||isSystemClass(name)
+    }
+
+    private fun isSystemClass(fileName:String): Boolean {
+        DEFAULT_EXCLUDE.forEach {exclude ->
+            if (fileName.matches(exclude.toRegex())) return true
+        }
+        return false
     }
 }

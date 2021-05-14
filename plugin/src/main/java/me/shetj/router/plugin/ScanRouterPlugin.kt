@@ -4,6 +4,8 @@ import com.android.build.api.transform.*
 import com.android.build.api.variant.VariantInfo
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.objectweb.asm.ClassReader
@@ -11,9 +13,12 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
+import java.util.zip.ZipEntry
 
 /**
  *
@@ -26,7 +31,8 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
 
 
     private val routerMap = HashMap<String, String>()
-    private var sRouterFile:File ?= null
+    private var routerJar: JarInput? = null
+    private var outputFilePath: File? = null
 
     override fun apply(project: Project) {
         val android = project.extensions.getByType(AppExtension::class.java)
@@ -41,7 +47,7 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
         return TransformManager.CONTENT_CLASS //表明是 class 文件
     }
 
-    override fun applyToVariant(variant: VariantInfo):Boolean {
+    override fun applyToVariant(variant: VariantInfo): Boolean {
         return variant.isDebuggable
     }
 
@@ -50,7 +56,7 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
      */
     override fun getScopes(): MutableSet<in QualifiedContent.Scope> {
 
-        return TransformManager.PROJECT_ONLY
+        return TransformManager.SCOPE_FULL_PROJECT
     }
 
     override fun isIncremental(): Boolean {
@@ -72,18 +78,27 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
 
         inputs.forEach { input ->
             input.directoryInputs.forEach { directoryInput ->
-                val dest = outputProvider.getContentLocation(
+                val outputFile = outputProvider.getContentLocation(
                     directoryInput.name,
                     directoryInput.contentTypes,
                     directoryInput.scopes,
                     Format.DIRECTORY
                 )
-                transformDir(directoryInput.file, dest)
+                transformDir(directoryInput.file, outputFile)
+                FileUtils.copyDirectory(directoryInput.file, outputFile)
             }
             input.jarInputs.forEach { jarInput ->
-                handJarInput(jarInput)
-            }
 
+                val outputFile = outputProvider.getContentLocation(
+                    jarInput.file.absolutePath,
+                    jarInput.contentTypes,
+                    jarInput.scopes,
+                    Format.JAR
+                )
+                if ( handJarInput(jarInput, outputFile)) {
+                    FileUtils.copyFile(jarInput.file, outputFile)
+                }
+            }
         }
 
         handRouter()
@@ -91,48 +106,94 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
     }
 
     private fun handRouter() {
-        if (sRouterFile != null) {
+        if (routerJar == null) {
+            println("路由生成错误，请导入向“me.shetj.router.SRouter”")
+            return
+        }
+        if (outputFilePath == null) {
+            println("路由生成错误，无法获取输出路径")
+            return
+        }
+        routerJar?.let {
+            val jarFile = routerJar!!.file
+            val tmp = File(jarFile.parent, jarFile.name + ".tmp")
+            if (tmp.exists()) tmp.delete()
+            val file = JarFile(jarFile)
+            val dest = outputFilePath
+            val enumeration = file.entries()
+            val jos = JarOutputStream(FileOutputStream(tmp))
 
-            //TODO
+            while (enumeration.hasMoreElements()) {
+                val jarEntry = enumeration.nextElement()
+                val entryName = jarEntry.name
+                val zipEntry = ZipEntry(entryName)
+                val className = entryName.replace("/", ".")
+                val input = file.getInputStream(jarEntry)
+                jos.putNextEntry(zipEntry)
+                if (ClassMatchKit.isMatchFile(className)) {
+                    jos.write(weaveSingleClassToByteArray(input))
+                } else {
+                    jos.write(IOUtils.toByteArray(input))
+                }
+                input.close()
+                jos.closeEntry()
+            }
+            jos.close()
+            file.close()
+            println(tmp)
+            println(dest)
+            FileUtils.copyFile(tmp, dest)
+            FileUtils.deleteQuietly(tmp)
         }
     }
 
-    private fun transformJar(file: File, dest: File) {
-        println("transformJar:file = ${file.absolutePath}")
+    private fun weaveSingleClassToByteArray(jarFile: InputStream): ByteArray {
+        val classReader = ClassReader(jarFile)
+        val cw = ClassWriter(ClassWriter.COMPUTE_FRAMES)
+        val classVisitor = HandRouterClassVisitor(routerMap, cw)
+        classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
+        return cw.toByteArray()
     }
+
 
     private fun transformDir(file: File, dest: File) {
-        readClassWithPath(file, file)
+        readClassWithPath(file, file, dest)
     }
 
 
-    private fun readClassWithPath(root: File, dir: File) {
-        dir.listFiles()?.forEach { file ->
+    private fun readClassWithPath(root: File, input: File, outputFile: File) {
+        val srcDirPath = input.absolutePath
+        val destDirPath = outputFile.absolutePath
+        input.listFiles()?.forEach { file ->
+            val destFilePath = file.absolutePath.replace(srcDirPath, destDirPath)
+            val destFile = File(destFilePath)
             if (file.isDirectory) {
-                readClassWithPath(root, file)
+                readClassWithPath(root, file, destFile)
             } else {
                 val filePath = file.absolutePath
-                if (!filePath.endsWith(".class")) return
+                if (ClassMatchKit.isNeedIgClass(file)) return
                 val className = ClassMatchKit.getClassName(root, file)
                 addRouteMap(filePath, className)
             }
         }
     }
 
+
     private fun addRouteMap(filePath: String, className: String) {
         addRouteMap(FileInputStream(filePath), className)
     }
 
     private fun addRouteMap(ins: InputStream, className: String) {
-        println("className = $className")
         val reader = ClassReader(ins)
         val node = ClassNode()  // class node = ClassVisitor
         reader.accept(node, ClassWriter.COMPUTE_MAXS)
         if (node.visibleAnnotations.isNotEmpty()) {
+
             node.visibleAnnotations.findLast { an ->
-                ClassMatchKit.isMatchAnnotation(an.values[0].toString())
-            }?.let {an ->
-                routerMap[an.values[0].toString()] = className
+                ClassMatchKit.isMatchAnnotation(an.desc)
+            }?.let { an ->
+                println(an.desc+"||${an.values[0]}||${an.values[1]}||$className")
+                routerMap[an.values[1].toString()] = className
             }
         }
         /*     if (node.invisibleAnnotations.isNullOrEmpty()) {
@@ -160,31 +221,43 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
     }
 
 
-    private fun handJarInput(jarInput: JarInput) {
+    private fun handJarInput(jarInput: JarInput, outputFile: File): Boolean {
         if (jarInput.file.absolutePath.endsWith(".jar")) {
             val jarFile = JarFile(jarInput.file)
             val enumeration = jarFile.entries()
             //用于保存
             while (enumeration.hasMoreElements()) {
-                val jarEntry =  enumeration . nextElement () as JarEntry
+                val jarEntry = enumeration.nextElement() as JarEntry
                 val entryName = jarEntry.name
-                val inputStream = jarFile . getInputStream (jarEntry)
-                if (entryName.endsWith(".class")) {
-                    println("entryName ->$entryName")
-                    val classReader =   ClassReader(inputStream)
-                    val node =   ClassNode()
-                    classReader.accept(node, ClassWriter.COMPUTE_MAXS)
-                    if (node.visibleAnnotations.isNotEmpty()) {
-                        node.visibleAnnotations.findLast { an ->
-                            ClassMatchKit.isMatchAnnotation(an.values[0].toString())
-                        }?.let {an ->
-                            routerMap[an.values[0].toString()] = entryName
+                val inputStream = jarFile.getInputStream(jarEntry)
+                val className = entryName.replace("/", ".")
+                if (ClassMatchKit.isMatchFile(className)) {
+                    routerJar = jarInput
+                    outputFilePath = outputFile
+                    return false
+                }
+                if (!ClassMatchKit.isNeedIgClass(className)) {
+                    try {
+                        val classReader = ClassReader(inputStream)
+                        val node = ClassNode()
+                        classReader.accept(node, ClassWriter.COMPUTE_MAXS)
+                        if (node.visibleAnnotations == null) continue
+                        if (node.visibleAnnotations?.isNotEmpty() == true) {
+                            node.visibleAnnotations?.findLast { an ->
+                                ClassMatchKit.isMatchAnnotation(an.desc)
+                            }?.let { an ->
+                                routerMap[an.values[1].toString()] = className
+                            }
                         }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
             }
             jarFile.close()
+            return true
         }
+        return false
     }
 
 
