@@ -1,9 +1,11 @@
 package me.shetj.router
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import java.lang.NullPointerException
 
 
 /**
@@ -27,7 +29,7 @@ class SRouterKit private constructor() {
         @JvmStatic
         fun init(context :Context) {
             application = context.applicationContext
-            getInstance().loadRouter()
+            getInstance().loadRouterMap()
         }
 
         @JvmStatic
@@ -92,8 +94,16 @@ class SRouterKit private constructor() {
      * 通过Transform，扫描获取到的class
      * 利用ASM加载到map
      */
-    private  fun loadRouter(){
-        this.routerMap.put("test","test")
+    private  fun loadRouterMap(){
+        Log.e(TAG,"load router error :please use routerPlugin add routerMap")
+    }
+
+    fun loadRouter(path: String,activity: String){
+        if (routerMap.containsKey(path)){
+            Log.e(TAG,"load router error :path already exists")
+            return
+        }
+        this.routerMap[path] = activity
     }
 
 }

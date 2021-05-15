@@ -17,7 +17,7 @@ class HandRouterClassVisitor(private val routerMap:HashMap<String,String>,classV
         signature: String?,
         exceptions: Array<out String>?
     ): MethodVisitor {
-        return if (name == "loadRouter"){
+        return if (name == "loadRouterMap"){
             RouterMethodVisitor(routerMap,super.visitMethod(access, name, descriptor, signature, exceptions))
         }else{
             super.visitMethod(access, name, descriptor, signature, exceptions)
