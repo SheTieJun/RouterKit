@@ -3,9 +3,9 @@ package me.shetj.routetkit
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import me.shetj.annotation.SRouter
+import me.shetj.router.SRouterKit.Companion.addToRouter
 
 
-@SRouter(path = "activity/router2")
 class Router2Activity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

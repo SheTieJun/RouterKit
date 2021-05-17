@@ -4,6 +4,8 @@ import com.android.build.api.transform.*
 import com.android.build.api.variant.VariantInfo
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.android.build.gradle.internal.tasks.Workers
+import com.android.ide.common.internal.WaitableExecutor
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.gradle.api.Plugin
@@ -21,11 +23,11 @@ import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 
 /**
+ * transform 扫描
+ * 1. 扫描带注解的
+ * 2. 扫描获取到 SRouterKit
  *
- * <b>@author：</b> shetj<br>
- * <b>@createTime：</b> 2021/5/13 0013<br>
- * <b>@email：</b> 375105540@qq.com<br>
- * <b>@describe</b>  <br>
+ *
  */
 class ScanRouterPlugin : Plugin<Project>, Transform() {
 
@@ -60,7 +62,7 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
     }
 
     override fun isIncremental(): Boolean {
-        return true
+        return false
     }
 
     override fun transform(transformInvocation: TransformInvocation) {
@@ -75,7 +77,7 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
         if (!isIncremental) {
             outputProvider?.deleteAll()
         }
-
+        val  waitableExecutor = WaitableExecutor.useGlobalSharedThreadPool()
         inputs.forEach { input ->
             input.directoryInputs.forEach { directoryInput ->
                 val outputFile = outputProvider.getContentLocation(
@@ -84,8 +86,10 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
                     directoryInput.scopes,
                     Format.DIRECTORY
                 )
-                transformDir(directoryInput.file, outputFile)
-                FileUtils.copyDirectory(directoryInput.file, outputFile)
+                waitableExecutor.execute {
+                    transformDir(directoryInput.file, outputFile)
+                    FileUtils.copyDirectory(directoryInput.file, outputFile)
+                }
             }
             input.jarInputs.forEach { jarInput ->
 
@@ -95,14 +99,15 @@ class ScanRouterPlugin : Plugin<Project>, Transform() {
                     jarInput.scopes,
                     Format.JAR
                 )
-                if ( handJarInput(jarInput, outputFile)) {
-                    FileUtils.copyFile(jarInput.file, outputFile)
+                waitableExecutor.execute {
+                    if (handJarInput(jarInput, outputFile)) {
+                        FileUtils.copyFile(jarInput.file, outputFile)
+                    }
                 }
             }
         }
-
+        waitableExecutor.waitForTasksWithQuickFail<Any>(true)
         handRouter()
-
     }
 
     private fun handRouter() {

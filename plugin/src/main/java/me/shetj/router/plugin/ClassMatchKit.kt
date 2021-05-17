@@ -12,8 +12,8 @@ import java.io.File
 object ClassMatchKit {
 
     private const val DEF_ROUTER_FILE = "me.shetj.router.SRouterKit"
-    const val ROUTER = "Lme/shetj/router/SRouterKit;"
     private const val MATCH_ANNOTATION = "Lme/shetj/annotation/SRouter;"
+    const val SCAN_CHANGE_METHOD = "loadRouterMap"
 
 
     private val DEFAULT_EXCLUDE = arrayListOf(  "^android\\..*",

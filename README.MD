@@ -1,6 +1,8 @@
-## Router 路由 
+## Router 路由
 
-1. 2021年5月15日：已经初步实现路由跳转Activity
+目标需求：
+1. 只要求支持Activity，暂不需要其他那些花里胡哨的功能
+2. 尽量快的完成获取到路由信息
 
 ### 实现思路
 - 注解 :路由切入点和资源路径
@@ -8,7 +10,12 @@
 - 通过ASM 操作，把收集的数据插装到对应方法 `loadRouterMap`
 - 路由组件初始化的时候内部调用`loadRouterMap`完成路由注册
 
-
+### 更新日志
+1. 2021年5月15日：已经初步实现路由跳转Activity
+2. 2021年5月17日：优化相关处理
+    1. 路由场景不适合增量，因为需要每次把“所有的路由”信息重新写入class
+    2. 新增多线程处理扫描，提高扫描效率
+    3. 添加跳转方法
 
 ### 遇到的问题
 1.文件扫描
@@ -73,7 +80,7 @@ private fun handJarInput(jarInput: JarInput, outputFile: File): Boolean {
 > 比如栈，比如对象
 > 遇到了操作对象中的hashMap,jar异常错误
 `java.lang.IncompatibleclassChangeBrror: Found class java.util.HashMap，but interface was expected (declaration of 'java.util.HashMap' appears in /apex/com. android.runtime/javalib/core-oj.jar)`
-> 最后通过取巧解决了，操作方法，来替代操作方法
+> 最后通过取巧解决了，操作其他类的方法，来替代操作map方法
 
 ```kotlin
     override fun visitCode() {

@@ -9,11 +9,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        SRouterKit.isDebug = true
-        SRouterKit.init(this)
-        findViewById<View>(R.id.startJump).setOnClickListener {
 
+        findViewById<View>(R.id.startJump1).setOnClickListener {
             SRouterKit.getInstance().startJump(this@MainActivity, "activity/router")
+//            SRouterKit.getInstance().startJump("activity/router2")
         }
+        findViewById<View>(R.id.startJump2).setOnClickListener {
+            SRouterKit.getInstance().startJump(path = "activity/router2")
+        }
+
+
     }
 }
