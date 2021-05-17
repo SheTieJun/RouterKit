@@ -11,11 +11,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<View>(R.id.startJump1).setOnClickListener {
-            SRouterKit.getInstance().startJump(this@MainActivity, "activity/router")
-//            SRouterKit.getInstance().startJump("activity/router2")
+            SRouterKit.startActivity(this@MainActivity, "activity/router")
         }
         findViewById<View>(R.id.startJump2).setOnClickListener {
-            SRouterKit.getInstance().startJump(path = "activity/router2")
+            SRouterKit.startActivity(path = "activity/router2")
         }
 
 

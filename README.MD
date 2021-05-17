@@ -114,4 +114,5 @@ private fun handJarInput(jarInput: JarInput, outputFile: File): Boolean {
         this.routerMap[path] = activity
     }
 ```
-
+4. ASM编译错误,当参数传 context ?= null的会出现编译异常 TypeNotPresentException
+> 解决方法：写2个方法，空和不空分开处理

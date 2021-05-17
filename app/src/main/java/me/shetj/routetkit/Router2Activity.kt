@@ -1,9 +1,7 @@
 package me.shetj.routetkit
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import me.shetj.annotation.SRouter
-import me.shetj.router.SRouterKit.Companion.addToRouter
+import androidx.appcompat.app.AppCompatActivity
 
 
 class Router2Activity : AppCompatActivity() {

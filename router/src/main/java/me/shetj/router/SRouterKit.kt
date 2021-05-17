@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.annotation.WorkerThread
 
 
 /**
@@ -45,22 +44,39 @@ class SRouterKit private constructor() {
             }
         }
 
-        inline fun <reified T : Activity> addToRouter(path: String,isReplace: Boolean = false) {
-            getInstance().addToRouter(path, T::class.qualifiedName.toString(),isReplace)
+        /**
+         * 用来修改或者添加 无法添加路由注解的activity
+         */
+        inline fun <reified T : Activity> addToRouter(path: String, isReplace: Boolean = false) {
+            getInstance().addToRouter(path, T::class.qualifiedName.toString(), isReplace)
         }
 
+        /**
+         * 根据路由[path]跳转到对应的界面，请优先使用[context]
+         * @param context 上下文
+         * @param path 路由
+         * @param mapInfo 需要传递的信息
+         * @param bundle 需要传递的信息通过bundle传递
+         */
         @JvmStatic
-        @JvmOverloads
         fun startActivity(
             context: Context? = null,
             path: String,
             mapInfo: HashMap<String, String>? = null,
-            bundle: Bundle? = null
-        ){
-            if (!Companion::application.isInitialized){
-                error("u should init first: SRouterKit.init(context)")
+            bundle: Bundle? = null,
+            requestCode: Int? = null
+        ) {
+            if (!Companion::application.isInitialized) {
+                error("you should init first: \"SRouterKit.init(context)\"")
             }
-            getInstance().start(context, path, mapInfo, bundle)
+            if (requestCode != null && context == null && context !is Activity) {
+                error("if you want to use \"startActivityForResult()\" , context no be null and context is a \"Activity\"")
+            }
+            if (context != null){
+                getInstance().start(context, path, mapInfo, bundle,requestCode)
+            }else{
+                getInstance().start(path, mapInfo, bundle)
+            }
         }
     }
 
@@ -75,27 +91,48 @@ class SRouterKit private constructor() {
      * @param bundle 需要传递的信息通过bundle传递
      */
     private fun start(
-        context: Context? = null,
+        context: Context,
         path: String,
         mapInfo: HashMap<String, String>? = null,
-        bundle: Bundle? = null
+        bundle: Bundle? = null,
+        requestCode: Int? = null
     ) {
         getIntentByPath(context, path)?.let { intent ->
             mapInfo?.forEach {
                 intent.putExtra(it.key, it.value)
             }
-            (context?:application).startActivity(intent, bundle)
+            if (requestCode != null && (context is Activity)) {
+                context.startActivityForResult(intent, requestCode, bundle)
+            } else {
+                context.startActivity(intent,bundle)
+            }
+        }
+    }
+
+    private fun start(
+        path: String,
+        mapInfo: HashMap<String, String>? = null,
+        bundle: Bundle? = null,
+    ) {
+        getIntentByPath(null, path)?.let { intent ->
+            mapInfo?.forEach {
+                intent.putExtra(it.key, it.value)
+            }
+            application.startActivity(intent,bundle)
         }
     }
 
     fun addToRouter(path: String, activity: String, isReplace: Boolean = false) {
-        if (routerMap.containsKey(path) && !isReplace) {
+        if (!isReplace && routerMap.containsKey(path)) {
             Log.e(TAG, "load router error :path($path) already exists")
             return
         }
         this.routerMap[path] = activity
     }
 
+    /**
+     * 给ASM 用来添加路由的
+     */
     private fun loadRouter(path: String, activity: String) {
         addToRouter(path, activity, false)
     }
