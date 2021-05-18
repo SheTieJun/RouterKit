@@ -2,7 +2,7 @@ apply plugin: 'maven'
 
 group = 'me.shetj.sdk'
 version = '1.0.0'
-archivesBaseName = 'routerkit'
+archivesBaseName = 'router-kit'
 
 //upload
 ////本地上传
