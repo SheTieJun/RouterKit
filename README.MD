@@ -10,6 +10,12 @@
 - 通过ASM 操作，把收集的数据插装到对应方法 `loadRouterMap`
 - 路由组件初始化的时候内部调用`loadRouterMap`完成路由注册
 
+```
+com.github.SheTieJun.RoutetKit:router-plugin:+
+com.github.SheTieJun.RoutetKit:router-annotation:+
+```
+
+
 ### 更新日志
 1. 2021年5月15日：已经初步实现路由跳转Activity
 2. 2021年5月17日：优化相关处理
