@@ -3,6 +3,7 @@ package me.shetj.routetkit
 import android.app.Application
 import android.content.Context
 import me.shetj.router.SRouterKit
+import me.shetj.service.SModuleServiceKit
 
 /**
  * **@packageName：** com.ebu.master<br></br>
@@ -19,6 +20,8 @@ class APP : Application() {
         SRouterKit.isDebug = true
         SRouterKit.init(this)
         SRouterKit.addToRouter<Router2Activity>("activity/router2")
+
+        SModuleServiceKit.init()
     }
 
     override fun attachBaseContext(base: Context) {

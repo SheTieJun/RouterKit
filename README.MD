@@ -1,6 +1,7 @@
 ## Router 路由基础库
 
-- [X] 基础跳转完成
+- [X] 基础跳转完成 ：`SRouterKit`
+- [X] 模块间数据交换获取： `SModuleServiceKit`
 
 
 ### 集成方法
@@ -53,4 +54,18 @@ if (releaseConfig.fun1Release) {
 
 ```kotlin
 SRouterKit.startActivity(this,path,bundle = bundle,mapInfo = mapInfo,requestCode = requestCode)
+```
+
+7. 模块化服务
+```
+@SModuleService("defService")
+class DefService:IModuleService {
+
+    fun getName() = "defService"
+
+}
+```
+获取并且使用
+```
+SModuleServiceKit.getInstance().get<DefService>("defService")?.getName()
 ```
