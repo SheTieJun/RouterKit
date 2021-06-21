@@ -1,6 +1,5 @@
 package me.shetj.service
 
-import android.content.Context
 import android.util.Log
 
 
@@ -11,8 +10,6 @@ class SModuleServiceKit private constructor() {
     companion object {
 
         private const val TAG = "SModuleServiceKit"
-
-        private lateinit var application: Context
 
         var isDebug = false
 
@@ -45,10 +42,11 @@ class SModuleServiceKit private constructor() {
      * 利用ASM加载到map
      */
     private fun loadServiceMap() {
-        Log.e(TAG, "load router error :please use routerPlugin [https://github.com/SheTieJun/RouterKit] add routerMap")
+        Log.e(TAG, "load load Service error :please use routerPlugin [https://github.com/SheTieJun/RouterKit] to add service")
     }
 
 
+    @Suppress("UNCHECKED_CAST")
     fun <T> get(name: String): T? {
         return try {
             synchronized(isLoadService){
@@ -66,7 +64,7 @@ class SModuleServiceKit private constructor() {
             }
         } catch (e: Exception) {
             if (isDebug) {
-                Log.e(TAG, " can't find this name with service")
+                Log.e(TAG, " can't find this $name with service")
             }
             e.printStackTrace()
             null
@@ -74,6 +72,6 @@ class SModuleServiceKit private constructor() {
     }
 
     fun put(name: String, serviceName: String) {
-        serviceMap?.put(name, serviceName)
+        serviceMap[name] = serviceName
     }
 }
