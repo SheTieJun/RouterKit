@@ -132,6 +132,9 @@ class SRouterKit private constructor() {
 
     /**
      * 给ASM 用来添加路由的
+     * 因为kotlin的ASM 操作存在一些问题，比如 map,还有？
+     *
+     * 应该是ASM 对于kotlin的类型推导存在问题
      */
     private fun loadRouter(path: String, activity: String) {
         addToRouter(path, activity, false)
@@ -148,7 +151,7 @@ class SRouterKit private constructor() {
      * 利用ASM加载到map
      */
     private fun loadRouterMap() {
-        Log.e(TAG, "load router error :please use routerPlugin add routerMap")
+        Log.e(TAG, "load router error :please use routerPlugin [https://github.com/SheTieJun/RouterKit] add routerMap")
     }
 
 
