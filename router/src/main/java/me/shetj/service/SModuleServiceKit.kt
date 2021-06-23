@@ -5,13 +5,9 @@ import android.util.Log
 
 class SModuleServiceKit private constructor() {
 
-    private val isLoadService:Any = Any()
-
     companion object {
 
         private const val TAG = "SModuleServiceKit"
-
-        var isDebug = false
 
         @Volatile
         private var serviceKit: SModuleServiceKit? = null
@@ -42,30 +38,44 @@ class SModuleServiceKit private constructor() {
      * 利用ASM加载到map
      */
     private fun loadServiceMap() {
-        Log.e(TAG, "load load Service error :please use routerPlugin [https://github.com/SheTieJun/RouterKit] to add service")
+        Log.e(
+            TAG,
+            "load load Service error :please use routerPlugin [https://github.com/SheTieJun/RouterKit] to add service"
+        )
     }
 
-
-    @Suppress("UNCHECKED_CAST")
     fun <T> get(name: String): T? {
+        return get(name,true)
+    }
+
+    /**
+     *
+     * @param name 服务实例对应的名称
+     * @param isSingle 是否是单例
+     */
+    fun <T> get(name: String, isSingle: Boolean): T? {
         return try {
-            synchronized(isLoadService){
-                //防止创建了多个模块服务
-                val service = serviceImpMap[name]
-                if (service != null) {
-                    service as T
-                } else {
-                    serviceMap[name]?.let { serviceName ->
-                        Class.forName(serviceName).newInstance() as T
-                    }?.also {
-                        serviceImpMap[name] = it
+            if (isSingle) {
+                synchronized(this) {
+                    //防止创建了多个模块服务
+                    val service = serviceImpMap[name]
+                    if (service != null) {
+                        service as T
+                    } else {
+                        serviceMap[name]?.let { serviceName ->
+                            Class.forName(serviceName).newInstance() as T
+                        }?.also {
+                            serviceImpMap[name] = it
+                        }
                     }
+                }
+            } else {
+                serviceMap[name]?.let { serviceName ->
+                    Class.forName(serviceName).newInstance() as T
                 }
             }
         } catch (e: Exception) {
-            if (isDebug) {
-                Log.e(TAG, " can't find this $name with service")
-            }
+            Log.e(TAG, " can't find this $name with service")
             e.printStackTrace()
             null
         }
@@ -73,5 +83,13 @@ class SModuleServiceKit private constructor() {
 
     fun put(name: String, serviceName: String) {
         serviceMap[name] = serviceName
+    }
+
+    fun remove(name: String) {
+        serviceImpMap.remove(name)
+    }
+
+    fun clean() {
+        serviceImpMap.clear()
     }
 }

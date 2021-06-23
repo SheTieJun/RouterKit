@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import me.shetj.router.SRouterKit
 import me.shetj.service.SModuleServiceKit
 
@@ -18,6 +19,16 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.startJump2).setOnClickListener {
             SRouterKit.startActivity(path = "activity/router2")
         }
-        Log.i("SModuleServiceKit",SModuleServiceKit.getInstance().get<DefService>("defService")?.getName()?:"未获取到数据")
+
+        val info = "name = ${
+            SModuleServiceKit.getInstance().get<UserService>("defService")?.getName() ?: "为获取到名字"
+        }\n" +
+                "age = ${
+                    SModuleServiceKit.getInstance().get<UserService>("defService")
+                        ?.getAge() ?: "为获取到age"
+                }\n"
+        findViewById<TextView>(R.id.tv_msg).apply {
+            text = info
+        }
     }
 }
