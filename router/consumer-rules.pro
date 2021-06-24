@@ -41,6 +41,10 @@
   *;
 }
 
+-keep class * extends me.shetj.exception.BaseException {
+  *;
+}
+
 -keep class **.R$* {
  *;
 }

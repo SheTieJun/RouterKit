@@ -27,6 +27,14 @@ class MainActivity : AppCompatActivity() {
                     SModuleServiceKit.getInstance().get<UserService>("defService")
                         ?.getAge() ?: "为获取到age"
                 }\n"
+
+        val errorInfo = "name = ${
+            SModuleServiceKit.getInstance().get<UserService>("defService_error")?.getName() ?: "为获取到名字"
+        }\n" +
+                "age = ${
+                    SModuleServiceKit.getInstance().get<UserService>("defService")
+                        ?.getAge() ?: "为获取到age"
+                }\n"
         findViewById<TextView>(R.id.tv_msg).apply {
             text = info
         }

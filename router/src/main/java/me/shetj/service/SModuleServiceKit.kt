@@ -1,6 +1,7 @@
 package me.shetj.service
 
 import android.util.Log
+import me.shetj.exception.NoRouteFoundException
 
 
 class SModuleServiceKit private constructor() {
@@ -40,12 +41,13 @@ class SModuleServiceKit private constructor() {
     private fun loadServiceMap() {
         Log.e(
             TAG,
-            "load load Service error :please use routerPlugin [https://github.com/SheTieJun/RouterKit] to add service"
+            "load load Service error :please " +
+                    "use routerPlugin [https://github.com/SheTieJun/RouterKit] to add service"
         )
     }
 
     fun <T> get(name: String): T? {
-        return get(name,true)
+        return get(name, true)
     }
 
     /**
@@ -53,6 +55,7 @@ class SModuleServiceKit private constructor() {
      * @param name 服务实例对应的名称
      * @param isSingle 是否是单例
      */
+    @Suppress("UNCHECKED_CAST")
     fun <T> get(name: String, isSingle: Boolean): T? {
         return try {
             if (isSingle) {
@@ -62,7 +65,7 @@ class SModuleServiceKit private constructor() {
                     if (service != null) {
                         service as T
                     } else {
-                        serviceMap[name]?.let { serviceName ->
+                        findService(name).let { serviceName ->
                             Class.forName(serviceName).newInstance() as T
                         }?.also {
                             serviceImpMap[name] = it
@@ -70,14 +73,20 @@ class SModuleServiceKit private constructor() {
                     }
                 }
             } else {
-                serviceMap[name]?.let { serviceName ->
+                findService(name).let { serviceName ->
                     Class.forName(serviceName).newInstance() as T
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, " can't find this $name with service")
             e.printStackTrace()
             null
+        }
+    }
+
+    private fun findService(name: String): String {
+        return serviceMap[name] ?: kotlin.run {
+            throw NoRouteFoundException("There is no ModuleService match the name : [ $name ] " +
+                    "\nyou should make ModuleService implementation IModuleService and add annotation 'SModuleService' ")
         }
     }
 

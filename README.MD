@@ -3,6 +3,7 @@
 - [X] 基础跳转完成 ：`SRouterKit`
 - [X] 模块间数据交换获取： `SModuleServiceKit`
 - [X] 输出相关信息的`json` ：`app/routerPluginJson`
+- [X] 优化异常提示
 
 
 ### 集成方法
@@ -54,7 +55,7 @@ if (releaseConfig.fun1Release) {
 ```kotlin
 //初始化路由模块 
 SRouterKit.isDebug = isDebug
- SRouterKit.init(application.applicationContext)
+SRouterKit.init(application.applicationContext)
 //初始化服务模块 
 SModuleServiceKit.init()
 ```

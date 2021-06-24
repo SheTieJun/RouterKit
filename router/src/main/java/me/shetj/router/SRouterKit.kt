@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import me.shetj.exception.NoServiceFoundException
 
 
 /**
@@ -66,16 +67,20 @@ class SRouterKit private constructor() {
             bundle: Bundle? = null,
             requestCode: Int? = null
         ) {
-            if (!Companion::application.isInitialized) {
-                error("you should init first: \"SRouterKit.init(context)\"")
-            }
-            if (requestCode != null && context == null && context !is Activity) {
-                error("if you want to use \"startActivityForResult()\" , context no be null and context is a \"Activity\"")
-            }
-            if (context != null){
-                getInstance().start(context, path, mapInfo, bundle,requestCode)
-            }else{
-                getInstance().start(path, mapInfo, bundle)
+            try {
+                if (!Companion::application.isInitialized) {
+                    error("you should init first: \"SRouterKit.init(context)\"")
+                }
+                if (requestCode != null && context == null && context !is Activity) {
+                    error("if you want to use \"startActivityForResult()\" , context no be null and context is a \"Activity\"")
+                }
+                if (context != null) {
+                    getInstance().start(context, path, mapInfo, bundle, requestCode)
+                } else {
+                    getInstance().start(path, mapInfo, bundle)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -97,14 +102,14 @@ class SRouterKit private constructor() {
         bundle: Bundle? = null,
         requestCode: Int? = null
     ) {
-        getIntentByPath(context, path)?.let { intent ->
+        getIntentByPath(context, path).let { intent ->
             mapInfo?.forEach {
                 intent.putExtra(it.key, it.value)
             }
             if (requestCode != null && (context is Activity)) {
                 context.startActivityForResult(intent, requestCode, bundle)
             } else {
-                context.startActivity(intent,bundle)
+                context.startActivity(intent, bundle)
             }
         }
     }
@@ -114,17 +119,17 @@ class SRouterKit private constructor() {
         mapInfo: HashMap<String, String>? = null,
         bundle: Bundle? = null,
     ) {
-        getIntentByPath(null, path)?.let { intent ->
+        getIntentByPath(null, path).let { intent ->
             mapInfo?.forEach {
                 intent.putExtra(it.key, it.value)
             }
-            application.startActivity(intent,bundle)
+            application.startActivity(intent, bundle)
         }
     }
 
     fun addToRouter(path: String, activity: String, isReplace: Boolean = false) {
         if (!isReplace && routerMap.containsKey(path)) {
-            Log.e(TAG, "load router error :path($path) already exists")
+            Log.e(TAG, "add Router fail ,load router error :path($path) already exists")
             return
         }
         this.routerMap[path] = activity
@@ -140,10 +145,8 @@ class SRouterKit private constructor() {
         addToRouter(path, activity, false)
     }
 
-    private fun getIntentByPath(context: Context?, path: String): Intent? {
-        return checkAndGet(path)?.let { classPath ->
-            getIntent(context, classPath = classPath)
-        }
+    private fun getIntentByPath(context: Context?, path: String): Intent {
+        return getIntent(context, classPath = checkAndGet(path))
     }
 
     /**
@@ -151,17 +154,17 @@ class SRouterKit private constructor() {
      * 利用ASM加载到map
      */
     private fun loadRouterMap() {
-        Log.e(TAG, "load router error :please use routerPlugin [https://github.com/SheTieJun/RouterKit] add routerMap")
+        Log.e(
+            TAG, "load router error :" +
+                    "please use routerPlugin [https://github.com/SheTieJun/RouterKit] add routerMap"
+        )
     }
 
 
-    private fun checkAndGet(path: String): String? {
+    private fun checkAndGet(path: String): String {
         val classPath = routerMap[path]
         if (classPath.isNullOrBlank()) {
-            if (isDebug) {
-                Log.e(TAG, "startJump: can't find this path ($path:$classPath)")
-            }
-            return null
+            throw NoServiceFoundException("There is no router match the path : [ $path ]")
         }
         return classPath
     }
