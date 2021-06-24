@@ -2,7 +2,6 @@ package me.shetj.routetkit
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import me.shetj.router.SRouterKit
@@ -22,14 +21,6 @@ class MainActivity : AppCompatActivity() {
 
         val info = "name = ${
             SModuleServiceKit.getInstance().get<UserService>("defService")?.getName() ?: "为获取到名字"
-        }\n" +
-                "age = ${
-                    SModuleServiceKit.getInstance().get<UserService>("defService")
-                        ?.getAge() ?: "为获取到age"
-                }\n"
-
-        val errorInfo = "name = ${
-            SModuleServiceKit.getInstance().get<UserService>("defService_error")?.getName() ?: "为获取到名字"
         }\n" +
                 "age = ${
                     SModuleServiceKit.getInstance().get<UserService>("defService")

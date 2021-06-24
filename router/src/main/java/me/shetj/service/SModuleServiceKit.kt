@@ -2,6 +2,7 @@ package me.shetj.service
 
 import android.util.Log
 import me.shetj.exception.NoRouteFoundException
+import kotlin.reflect.full.createInstance
 
 
 class SModuleServiceKit private constructor() {
@@ -65,17 +66,13 @@ class SModuleServiceKit private constructor() {
                     if (service != null) {
                         service as T
                     } else {
-                        findService(name).let { serviceName ->
-                            Class.forName(serviceName).newInstance() as T
-                        }?.also {
+                        createInstance<T>(name)?.also {
                             serviceImpMap[name] = it
                         }
                     }
                 }
             } else {
-                findService(name).let { serviceName ->
-                    Class.forName(serviceName).newInstance() as T
-                }
+                createInstance<T>(name)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -83,10 +80,22 @@ class SModuleServiceKit private constructor() {
         }
     }
 
+    /**
+     * 创建对象
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> createInstance(name: String): T {
+        return findService(name).let { serviceName ->
+            Class.forName(serviceName).kotlin.createInstance() as T
+        }
+    }
+
     private fun findService(name: String): String {
         return serviceMap[name] ?: kotlin.run {
-            throw NoRouteFoundException("There is no ModuleService match the name : [ $name ] " +
-                    "\nyou should make ModuleService implementation IModuleService and add annotation 'SModuleService' ")
+            throw NoRouteFoundException(
+                "There is no ModuleService match the name : [ $name ] " +
+                        "\nyou should make ModuleService implementation IModuleService and add annotation 'SModuleService' "
+            )
         }
     }
 
