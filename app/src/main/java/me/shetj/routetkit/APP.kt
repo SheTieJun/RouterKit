@@ -16,7 +16,6 @@ import me.shetj.service.SModuleServiceKit
 class APP : Application() {
     override fun onCreate() {
         super.onCreate()
-        SRouterKit.isDebug = true
         SRouterKit.init(this)
         SRouterKit.addToRouter<Router2Activity>("activity/router2")
         SModuleServiceKit.init()

@@ -22,8 +22,6 @@ class SRouterKit private constructor() {
 
         private lateinit var application: Context
 
-        var isDebug = false
-
         @Volatile
         private var sRouter: SRouterKit? = null
 
@@ -52,6 +50,11 @@ class SRouterKit private constructor() {
             getInstance().addToRouter(path, T::class.qualifiedName.toString(), isReplace)
         }
 
+        @JvmStatic
+        fun startActivity(context: Context? = null, option: RouterOption) {
+            startActivity(context, option.path, option.mapInfo, option.bundle, option.requestCode)
+        }
+
         /**
          * 根据路由[path]跳转到对应的界面，请优先使用[context]
          * @param context 上下文
@@ -60,9 +63,10 @@ class SRouterKit private constructor() {
          * @param bundle 需要传递的信息通过bundle传递
          */
         @JvmStatic
+        @JvmOverloads
         fun startActivity(
             context: Context? = null,
-            path: String,
+            path: String? = null,
             mapInfo: HashMap<String, String>? = null,
             bundle: Bundle? = null,
             requestCode: Int? = null
@@ -71,7 +75,10 @@ class SRouterKit private constructor() {
                 if (!Companion::application.isInitialized) {
                     error("you should init first: \"SRouterKit.init(context)\"")
                 }
-                if (requestCode != null && context == null && context !is Activity) {
+                if (path.isNullOrEmpty()) {
+                    error("path not null")
+                }
+                if ((requestCode != null && context == null) || (requestCode != null && context !is Activity)) {
                     error("if you want to use \"startActivityForResult()\" , context no be null and context is a \"Activity\"")
                 }
                 if (context != null) {

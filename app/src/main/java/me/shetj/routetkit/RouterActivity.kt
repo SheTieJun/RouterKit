@@ -1,9 +1,9 @@
 package me.shetj.routetkit
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import me.shetj.annotation.SRouter
-import me.shetj.router.SRouterKit
+import me.shetj.router.startActivity
 
 
 @SRouter(path = "activity/router")
@@ -12,6 +12,12 @@ class RouterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_router)
         Text()
-        SRouterKit.startActivity(path = "activity/router2xxx")
+
+        startActivity {
+            path = "activity/router2xxx"
+            mapInfo = null
+            bundle = null
+            requestCode = 1
+        }
     }
 }

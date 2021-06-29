@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import me.shetj.router.SRouterKit
+import me.shetj.router.startActivity
 import me.shetj.service.SModuleServiceKit
 
 class MainActivity : AppCompatActivity() {
@@ -15,8 +16,16 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.startJump1).setOnClickListener {
             SRouterKit.startActivity(this@MainActivity, "activity/router")
         }
+
         findViewById<View>(R.id.startJump2).setOnClickListener {
-            SRouterKit.startActivity(path = "activity/router2")
+
+            startActivity {
+                path = "activity/router2"
+                mapInfo = null
+                bundle = null
+                requestCode = 1
+            }
+
         }
 
         val info = "name = ${

@@ -64,6 +64,14 @@ SModuleServiceKit.init()
 //跳转
 SRouterKit.startActivity(this,path,bundle = bundle,mapInfo = mapInfo,requestCode = requestCode)
 ```
+```
+       startRoute {
+            path = "activity/router2xxx"
+            mapInfo = null
+            bundle = null
+            requestCode = 1
+        }
+```
 
 7. ModuleService服务
 
