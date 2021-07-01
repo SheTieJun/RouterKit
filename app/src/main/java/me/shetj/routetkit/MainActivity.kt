@@ -18,14 +18,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.startJump2).setOnClickListener {
-
+            //测试正常跳转
             startActivity {
                 path = "activity/router2"
-                mapInfo = null
-                bundle = null
                 requestCode = 1
             }
-
         }
 
         val info = "name = ${

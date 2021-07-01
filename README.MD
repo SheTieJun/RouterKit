@@ -6,6 +6,8 @@
 - [X] 优化异常提示
 
 
+插件部分实现逻辑：[router_plugin](https://github.com/SheTieJun/router_plugin)
+
 ### 集成方法
 集成插件
 1. `build.gradle`

@@ -52,7 +52,7 @@ class SRouterKit private constructor() {
 
         @JvmStatic
         fun startActivity(context: Context? = null, option: RouterOption) {
-            startActivity(context, option.path, option.mapInfo, option.bundle, option.requestCode)
+            startActivity(context, option.path, option.intentInfo, option.bundle, option.requestCode)
         }
 
         /**

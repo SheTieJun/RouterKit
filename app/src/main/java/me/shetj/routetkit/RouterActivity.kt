@@ -13,9 +13,10 @@ class RouterActivity : AppCompatActivity() {
         setContentView(R.layout.activity_router)
         Text()
 
+        //测试错误提示
         startActivity {
             path = "activity/router2xxx"
-            mapInfo = null
+            intentInfo = null
             bundle = null
             requestCode = 1
         }

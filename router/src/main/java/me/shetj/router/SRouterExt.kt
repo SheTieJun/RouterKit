@@ -5,8 +5,8 @@ import android.os.Bundle
 
 
 class RouterOption {
-    var path: String ?=null
-    var mapInfo: HashMap<String, String>? = null
+    var path: String ?=null //路由
+    var intentInfo: HashMap<String, String>? = null   //intent.put(key,value)
     var bundle: Bundle? = null
     var requestCode: Int? = null
 }
