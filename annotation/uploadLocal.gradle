@@ -2,7 +2,7 @@ apply plugin: 'maven'
 
 group = 'com.github.SheTieJun'
 version = '1.0.0'
-archivesBaseName = 'router-kit'
+archivesBaseName = 'router-annotation'
 
 //upload
 ////本地上传
