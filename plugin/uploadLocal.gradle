@@ -1,0 +1,17 @@
+
+apply plugin: 'maven'
+
+group = 'com.github.SheTieJun'
+version = '1.0.0'
+archivesBaseName = 'router-plugin'
+
+//upload
+////本地上传
+
+uploadArchives {
+    repositories.mavenDeployer {
+        //http://localhost:8080/maven/
+        repository(url: uri('../maven/shetj'))
+    }
+}
+

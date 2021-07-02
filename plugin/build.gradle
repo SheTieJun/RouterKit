@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation gradleApi()
+    implementation("com.android.tools.build:gradle:4.1.0")
+    implementation 'org.ow2.asm:asm:9.1'
+    implementation 'org.ow2.asm:asm-util:9.1'
+    implementation 'org.ow2.asm:asm-commons:9.1'
+}
+
+apply from : "uploadLocal.gradle"
