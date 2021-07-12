@@ -1,12 +1,18 @@
 package me.shetj.router
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import me.shetj.exception.NoRouteFoundException
 import me.shetj.exception.NoServiceFoundException
+import me.shetj.exception.RouterAlreadyExistException
+import kotlin.reflect.KClass
 
 
 /**
@@ -44,16 +50,50 @@ class SRouterKit private constructor() {
         }
 
         /**
+         * @param path 路由地址
+         * @param isReplace 是否替换
+         * @return Boolean 自定义跳转路由，true 成功，false失败
          * 用来修改或者添加 无法添加路由注解的activity
          */
-        inline fun <reified T : Activity> addToRouter(path: String, isReplace: Boolean = false) {
-            getInstance().addToRouter(path, T::class.qualifiedName.toString(), isReplace)
+        fun <T : Activity> addToRouter(
+            path: String,
+            activity: KClass<T>,
+            isReplace: Boolean = false
+        ): Boolean {
+            try {
+                getInstance().addToRouter(path, activity.qualifiedName.toString(), isReplace)
+                return true
+            } catch (e: RouterAlreadyExistException) {
+                e.printStackTrace()
+            }
+            return false
         }
 
+        /**
+         * @param option 跳转参数控制
+         * @return true 跳转成功，跳转失败
+         */
         @JvmStatic
-        fun startActivity(context: Context? = null, option: RouterOption) {
-            startActivity(context, option.path, option.intentInfo, option.bundle, option.requestCode)
+        fun startActivity(context: Context? = null, option: RouterOption): Boolean {
+            return startActivity(
+                context,
+                option.path,
+                option.intentInfo,
+                option.bundle,
+                option.requestCode
+            )
         }
+
+        /**
+         * 通过到scheme进行跳转，
+         * schemeWithHostAndPath = scheme://Host/Path?queryParameterNames
+         * example:
+         * startActivity("router://activity/router2?key=1&key2=2")
+         */
+        fun startActivity(schemeWithHostAndPath: String) {
+            startActivityByScheme(schemeWithHostAndPath)
+        }
+
 
         /**
          * 根据路由[path]跳转到对应的界面，请优先使用[context]
@@ -70,7 +110,7 @@ class SRouterKit private constructor() {
             mapInfo: HashMap<String, String>? = null,
             bundle: Bundle? = null,
             requestCode: Int? = null
-        ) {
+        ): Boolean {
             try {
                 if (!Companion::application.isInitialized) {
                     error("you should init first: \"SRouterKit.init(context)\"")
@@ -86,12 +126,17 @@ class SRouterKit private constructor() {
                 } else {
                     getInstance().start(path, mapInfo, bundle)
                 }
+                return true
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            return false
         }
     }
 
+    /**
+     * 用来保存路由注册表
+     */
     private val routerMap: HashMap<String, String> = HashMap()
 
 
@@ -121,6 +166,14 @@ class SRouterKit private constructor() {
         }
     }
 
+
+    /**
+     * 通过全局上下文，跳转到对应界面
+     * @param path 路由
+     * @param mapInfo 需要传递的信息
+     * @param bundle 需要传递的信息通过bundle传递
+     * @throws NoServiceFoundException 没有找到路由
+     */
     private fun start(
         path: String,
         mapInfo: HashMap<String, String>? = null,
@@ -134,10 +187,16 @@ class SRouterKit private constructor() {
         }
     }
 
-    fun addToRouter(path: String, activity: String, isReplace: Boolean = false) {
+    /**
+     * 添加新的路由相关信息
+     * @param path 路径
+     * @param activity 对应的activity
+     * @param isReplace 是否进行覆盖
+     * @throws RouterAlreadyExistException 添加路由失败，因为已经存在了
+     */
+    private fun addToRouter(path: String, activity: String, isReplace: Boolean = false) {
         if (!isReplace && routerMap.containsKey(path)) {
-            Log.e(TAG, "add Router fail ,load router error :path($path) already exists")
-            return
+            throw RouterAlreadyExistException("add Router fail ,load router error :path($path) already exists")
         }
         this.routerMap[path] = activity
     }
@@ -148,11 +207,24 @@ class SRouterKit private constructor() {
      *
      * 应该是ASM 对于kotlin的类型推导存在问题
      */
+    @Suppress("unused")
     private fun loadRouter(path: String, activity: String) {
         addToRouter(path, activity, false)
     }
 
+    /**
+     * 通过path,构建intent
+     * 1. 构建scheme Intent
+     * 2. 构建path对应的Activity Intent
+     * @throws NoServiceFoundException 没有找到路由
+     */
     private fun getIntentByPath(context: Context?, path: String): Intent {
+        val data: Uri = Uri.parse(path)
+        val intent = Intent(Intent.ACTION_VIEW, data)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        if (checkUrlScheme(intent)) {
+            return intent
+        }
         return getIntent(context, classPath = checkAndGet(path))
     }
 
@@ -167,15 +239,21 @@ class SRouterKit private constructor() {
         )
     }
 
-
+    /**
+     * 通过path 获取对应的activity
+     * @throws NoRouteFoundException 没有对应的路由
+     */
     private fun checkAndGet(path: String): String {
         val classPath = routerMap[path]
         if (classPath.isNullOrBlank()) {
-            throw NoServiceFoundException("There is no router match the path : [ $path ]")
+            throw NoRouteFoundException("There is no router match the path : [ $path ]")
         }
         return classPath
     }
 
+    /**
+     * 获取intent
+     */
     private fun getIntent(context: Context? = null, classPath: String): Intent {
         return Intent().apply {
             component = ComponentName(
@@ -186,5 +264,15 @@ class SRouterKit private constructor() {
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
         }
+    }
+
+    /**
+     * 检查是否有这样的activity
+     */
+    @SuppressLint("QueryPermissionsNeeded")
+    private fun checkUrlScheme(intent: Intent): Boolean {
+        val packageManager: PackageManager = application.packageManager
+        val activities = packageManager.queryIntentActivities(intent, 0)
+        return activities.isNotEmpty()
     }
 }

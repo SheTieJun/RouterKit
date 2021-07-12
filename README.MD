@@ -4,11 +4,14 @@
 - [X] 模块间数据交换获取： `SModuleServiceKit`
 - [X] 输出相关信息的`json` ：`app/routerPluginJson`
 - [X] 优化异常提示
+- [X] 支持Scheme跳转
+- [X] 返回路由跳转执行结果
 
 
 插件部分实现逻辑：[router_plugin](https://github.com/SheTieJun/router_plugin)
+transform -> 注解(SRouter和SModuleService) -> ASM(字节码插入到SRouterKit和SModuleServiceKit)
 
-### 集成方法
+### 集成说明
 集成插件
 1. `build.gradle`
 ```groovy
@@ -31,17 +34,20 @@ api 'com.github.SheTieJun.RouterKit:router-kit:+'
 ```
 
 
-3. `app` 模块
+3. `app` 主模块
 
 ```groovy
+apply plugin: 'com.android.application'
 apply plugin: 'shetj.plugin.scanRouter'
 ```
 
 4. 其他功能模块`module`
 ```groovy
 if (releaseConfig.fun1Release) {
+    //如果整个模块的功能要发布就当作一个lib
     apply plugin: 'com.android.library'
 } else {
+    //否则把模块当成APP
     apply plugin: 'com.android.application'
     apply plugin: 'shetj.plugin.scanRouter'
 }
@@ -73,6 +79,27 @@ SRouterKit.startActivity(this,path,bundle = bundle,mapInfo = mapInfo,requestCode
             bundle = null
             requestCode = 1
         }
+```
+通过scheme跳转
+
+```kotlin
+<activity android:name=".Router2Activity">
+            <intent-filter> <!--URL Scheme启动-->
+                <!--必有项-->
+                <action android:name="android.intent.action.VIEW"/>
+                <!--如果希望该应用可以通过浏览器的连接启动，则添加该项-->
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <!--表示该页面可以被隐式调用，必须加上该项-->
+                <category android:name="android.intent.category.DEFAULT"/>
+                <!--协议部分-->
+                <data android:scheme="router"
+                    android:host="activity"
+                    android:path="/scheme/router2"/>
+            </intent-filter>
+</activity>
+```
+```kotlin
+SRouterKit.startActivity("router://activity/scheme/router2?key=1&key2=2")
 ```
 
 7. ModuleService服务

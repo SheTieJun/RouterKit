@@ -17,7 +17,7 @@ class APP : Application() {
     override fun onCreate() {
         super.onCreate()
         SRouterKit.init(this)
-        SRouterKit.addToRouter<Router2Activity>("activity/router2")
+        SRouterKit.addToRouter("activity/router2",Router2Activity::class)
         SModuleServiceKit.init()
     }
 }

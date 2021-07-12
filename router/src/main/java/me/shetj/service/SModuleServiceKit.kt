@@ -2,6 +2,10 @@ package me.shetj.service
 
 import android.util.Log
 import me.shetj.exception.NoRouteFoundException
+import me.shetj.exception.NoServiceFoundException
+import me.shetj.exception.RouterAlreadyExistException
+import me.shetj.exception.ServiceAlreadyExistException
+import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
 
@@ -28,10 +32,33 @@ class SModuleServiceKit private constructor() {
             }
         }
 
+        /**
+         * 手动添加服务
+         */
+        fun <T : IModuleService> addService(
+            name: String,
+            moduleService: KClass<T>,
+            isReplace: Boolean = false
+        ): Boolean {
+            try {
+                getInstance().put(name, moduleService.qualifiedName.toString(), isReplace)
+                return true
+            } catch (e: ServiceAlreadyExistException) {
+                e.printStackTrace()
+            }
+            return false
+        }
+
     }
 
+    /**
+     * 用来服务表
+     */
     private val serviceMap: HashMap<String, String> = HashMap()
 
+    /**
+     * 用来保存实例
+     */
     private val serviceImpMap: HashMap<String, Any> = HashMap()
 
 
@@ -90,20 +117,31 @@ class SModuleServiceKit private constructor() {
         }
     }
 
+    /**
+     * @throws NoServiceFoundException 没有对应的服务
+     */
     private fun findService(name: String): String {
         return serviceMap[name] ?: kotlin.run {
-            throw NoRouteFoundException(
+            throw NoServiceFoundException(
                 "There is no ModuleService match the name : [ $name ] " +
                         "\nyou should make ModuleService implementation IModuleService and add annotation 'SModuleService' "
             )
         }
     }
 
-    fun put(name: String, serviceName: String) {
+    private fun put(name: String, serviceName: String) {
+        put(name, serviceName, false)
+    }
+
+    private fun put(name: String, serviceName: String, isReplace: Boolean) {
+        if (!isReplace && serviceMap.containsKey(name)) {
+            throw ServiceAlreadyExistException("add service fail ,put service error :service($name) already exists")
+        }
         serviceMap[name] = serviceName
     }
 
     fun remove(name: String) {
+        serviceMap.remove(name)
         serviceImpMap.remove(name)
     }
 

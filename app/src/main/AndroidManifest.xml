@@ -11,7 +11,20 @@
         android:name=".APP"
         android:theme="@style/Theme.RoutetKit"
         android:fullBackupContent="@xml/mybackupscheme">
-        <activity android:name=".Router2Activity"/>
+        <activity android:name=".Router2Activity">
+            <intent-filter> <!--URL Scheme启动-->
+                <!--必有项-->
+                <action android:name="android.intent.action.VIEW"/>
+                <!--如果希望该应用可以通过浏览器的连接启动，则添加该项-->
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <!--表示该页面可以被隐式调用，必须加上该项-->
+                <category android:name="android.intent.category.DEFAULT"/>
+                <!--协议部分-->
+                <data android:scheme="router"
+                    android:host="activity"
+                    android:path="/scheme/router2"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".RouterActivity"/>
         <activity android:name=".MainActivity">
             <intent-filter>

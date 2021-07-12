@@ -36,9 +36,18 @@
 
 #---------------------------------默认保留区---------------------------------
 #继承activity,application,service,broadcastReceiver,contentprovider....不进行混淆
--keep public class * extends android.app.Activity
+-keep class * extends android.app.Activity
 -keep class * implements me.shetj.service.IModuleService{
   *;
+}
+
+# keep 2个核心类，方便查看
+-keep class me.shetj.router.SRouterKit{
+ *;
+}
+
+-keep class me.shetj.service.SModuleServiceKit{
+ *;
 }
 
 -keep class * extends me.shetj.exception.BaseException {

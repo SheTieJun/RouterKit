@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.startJump1).setOnClickListener {
             SRouterKit.startActivity(this@MainActivity, "activity/router")
+            findViewById<TextView>(R.id.tv_msg).append("\nactivity/router")
         }
 
         findViewById<View>(R.id.startJump2).setOnClickListener {
@@ -23,6 +24,13 @@ class MainActivity : AppCompatActivity() {
                 path = "activity/router2"
                 requestCode = 1
             }
+            findViewById<TextView>(R.id.tv_msg).append("\nactivity/router2")
+        }
+
+        findViewById<View>(R.id.startJump3).setOnClickListener {
+            //测试正常跳转
+            SRouterKit.startActivity("router://activity/scheme/router2?key=1&key2=2")
+            findViewById<TextView>(R.id.tv_msg).append("\nrouter://activity/scheme/router2?key=1&key2=2")
         }
 
         val info = "name = ${
