@@ -18,6 +18,8 @@ class MainActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tv_msg).append("\nactivity/router")
         }
 
+        SRouterKit.startActivity {  }
+
         findViewById<View>(R.id.startJump2).setOnClickListener {
             //测试正常跳转
             startActivity {
@@ -32,6 +34,14 @@ class MainActivity : AppCompatActivity() {
             SRouterKit.startActivity("router://activity/scheme/router2?key=1&key2=2")
             findViewById<TextView>(R.id.tv_msg).append("\nrouter://activity/scheme/router2?key=1&key2=2")
         }
+
+
+        findViewById<View>(R.id.startJump4).setOnClickListener {
+            //测试正常跳转
+            SRouterKit.startActivity("haha://activity/scheme/router2?key=1&key2=2")
+            findViewById<TextView>(R.id.tv_msg).append("\nhaha://activity/scheme/router2?key=1&key2=2")
+        }
+
 
         val info = "name = ${
             SModuleServiceKit.getInstance().get<UserService>("defService")?.getName() ?: "为获取到名字"

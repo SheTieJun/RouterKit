@@ -27,6 +27,13 @@
             android:layout_height="wrap_content"
             android:text="@string/jump_3"/>
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/startJump4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jump_4"/>
+
+
     </com.google.android.material.chip.ChipGroup>
 
     <TextView

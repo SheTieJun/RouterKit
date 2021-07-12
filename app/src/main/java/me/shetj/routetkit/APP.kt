@@ -18,6 +18,7 @@ class APP : Application() {
         super.onCreate()
         SRouterKit.init(this)
         SRouterKit.addToRouter("activity/router2",Router2Activity::class)
+        SRouterKit.addToRouter("activity/scheme/router2",Router2Activity::class)
         SModuleServiceKit.init()
     }
 }

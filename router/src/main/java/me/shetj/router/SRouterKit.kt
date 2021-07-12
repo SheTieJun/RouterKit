@@ -84,6 +84,24 @@ class SRouterKit private constructor() {
             )
         }
 
+
+        /**
+         * @param block 跳转参数控制
+         * @return true 跳转成功，跳转失败
+         */
+        @JvmStatic
+        fun startActivity(context: Context? = null, block: RouterOption.() -> Unit): Boolean {
+            return RouterOption().apply(block).let { option ->
+                startActivity(
+                    context,
+                    option.path,
+                    option.intentInfo,
+                    option.bundle,
+                    option.requestCode
+                )
+            }
+        }
+
         /**
          * 通过到scheme进行跳转，
          * schemeWithHostAndPath = scheme://Host/Path?queryParameterNames
@@ -225,6 +243,12 @@ class SRouterKit private constructor() {
         if (checkUrlScheme(intent)) {
             return intent
         }
+        if (!intent.scheme.isNullOrEmpty()) {
+            return getIntent(
+                context,
+                classPath = checkAndGet("${data.host}${data.path}")
+            )
+        }
         return getIntent(context, classPath = checkAndGet(path))
     }
 
@@ -267,7 +291,7 @@ class SRouterKit private constructor() {
     }
 
     /**
-     * 检查是否有这样的activity
+     * 检查是否有Scheme对应的activity
      */
     @SuppressLint("QueryPermissionsNeeded")
     private fun checkUrlScheme(intent: Intent): Boolean {

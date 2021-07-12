@@ -9,7 +9,7 @@
 
 
 插件部分实现逻辑：[router_plugin](https://github.com/SheTieJun/router_plugin)
-transform -> 注解(SRouter和SModuleService) -> ASM(字节码插入到SRouterKit和SModuleServiceKit)
+> 大概思路：transform -> 扫描注解(SRouter和SModuleService) -> ASM(字节码插入到SRouterKit和SModuleServiceKit)->init初始化注册相关信息
 
 ### 集成说明
 集成插件
@@ -43,7 +43,7 @@ apply plugin: 'shetj.plugin.scanRouter'
 
 4. 其他功能模块`module`
 ```groovy
-if (releaseConfig.fun1Release) {
+if (releaseConfig.Fun2isLibrary) {
     //如果整个模块的功能要发布就当作一个lib
     apply plugin: 'com.android.library'
 } else {
@@ -61,10 +61,9 @@ if (releaseConfig.fun1Release) {
 6. 初始化和跳转
 
 ```kotlin
-//初始化路由模块 
-SRouterKit.isDebug = isDebug
+//初始化路由模块，注册相关路由
 SRouterKit.init(application.applicationContext)
-//初始化服务模块 
+//初始化服务模块，注册相关服务
 SModuleServiceKit.init()
 ```
 
@@ -84,23 +83,26 @@ SRouterKit.startActivity(this,path,bundle = bundle,mapInfo = mapInfo,requestCode
 
 ```kotlin
 <activity android:name=".Router2Activity">
-            <intent-filter> <!--URL Scheme启动-->
-                <!--必有项-->
-                <action android:name="android.intent.action.VIEW"/>
-                <!--如果希望该应用可以通过浏览器的连接启动，则添加该项-->
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <!--表示该页面可以被隐式调用，必须加上该项-->
-                <category android:name="android.intent.category.DEFAULT"/>
-                <!--协议部分-->
-                <data android:scheme="router"
-                    android:host="activity"
-                    android:path="/scheme/router2"/>
-            </intent-filter>
+     <intent-filter> <!--URL Scheme启动-->
+          <!--必有项-->
+          <action android:name="android.intent.action.VIEW"/>
+          <!--如果希望该应用可以通过浏览器的连接启动，则添加该项-->
+          <category android:name="android.intent.category.BROWSABLE"/>
+          <!--表示该页面可以被隐式调用，必须加上该项-->
+          <category android:name="android.intent.category.DEFAULT"/>
+          <!--协议部分-->
+          <data android:scheme="router"
+              android:host="activity"
+              android:path="/scheme/router2"/>
+     </intent-filter>
 </activity>
 ```
 ```kotlin
 SRouterKit.startActivity("router://activity/scheme/router2?key=1&key2=2")
 ```
+
+> 当scheme对应的activity不存在的时候，获取host+path,进行本地路由注册表查询
+> haha://activity/scheme/router2,因为scheme对应的activity不存在的时候，所有会去查找activity/scheme/router2的activity
 
 7. ModuleService服务
 
