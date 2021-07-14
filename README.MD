@@ -33,6 +33,12 @@ api 'com.github.SheTieJun.RouterKit:router-annotation:+'
 api 'com.github.SheTieJun.RouterKit:router-kit:+'
 ```
 
+或者通过过插件 （集成 v 0.0.6 以后）
+
+```groovy
+apply plugin: 'shetj.plugin.addRouter'
+```
+
 
 3. `app` 主模块
 
@@ -115,3 +121,7 @@ class DefServiceImp:UserService,IModuleService
 ```
 SModuleServiceKit.getInstance().get<UserService>("defService")?.getName()
 ```
+
+### 版本更新
+#### 插件升级
+v 0.0.6 支持通过插件集成
