@@ -2,6 +2,7 @@ package me.shetj.router
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -240,16 +241,13 @@ class SRouterKit private constructor() {
         val data: Uri = Uri.parse(path)
         val intent = Intent(Intent.ACTION_VIEW, data)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        if (checkUrlScheme(intent)) {
-            return intent
-        }
-        if (!intent.scheme.isNullOrEmpty()) {
-            return getIntent(
-                context,
-                classPath = checkAndGet("${data.host}${data.path}")
+        return if (intent.scheme.isNullOrEmpty()) {
+            getIntent(
+                context, classPath = checkAndGet(path)
             )
+        } else {
+            intent
         }
-        return getIntent(context, classPath = checkAndGet(path))
     }
 
     /**
@@ -259,7 +257,7 @@ class SRouterKit private constructor() {
     private fun loadRouterMap() {
         Log.e(
             TAG, "load router error :" +
-                    "please use routerPlugin [https://github.com/SheTieJun/RouterKit] add routerMap"
+                    "please use routerPlugin [https://github.com/SheTieJun/router_plugin] add routerMap"
         )
     }
 

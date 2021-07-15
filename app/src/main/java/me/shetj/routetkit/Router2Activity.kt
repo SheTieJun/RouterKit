@@ -2,8 +2,9 @@ package me.shetj.routetkit
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import me.shetj.annotation.SRouter
 
-
+@SRouter(path = "shell/activity/index")
 class Router2Activity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

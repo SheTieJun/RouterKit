@@ -107,8 +107,8 @@ SRouterKit.startActivity(this,path,bundle = bundle,mapInfo = mapInfo,requestCode
 SRouterKit.startActivity("router://activity/scheme/router2?key=1&key2=2")
 ```
 
-> 当scheme对应的activity不存在的时候，获取host+path,进行本地路由注册表查询
-> haha://activity/scheme/router2,因为scheme对应的activity不存在的时候，所有会去查找activity/scheme/router2的activity
+> 当scheme存在的时候，不会走本地的路由,走系统的路由方式
+> 当没有scheme的时候，走本地路由表查找
 
 7. ModuleService服务
 
