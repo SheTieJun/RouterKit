@@ -2,7 +2,6 @@ package me.shetj.router
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -292,6 +291,7 @@ class SRouterKit private constructor() {
      * 检查是否有Scheme对应的activity
      */
     @SuppressLint("QueryPermissionsNeeded")
+    @Deprecated("暂时无用，这个只能找准确的，不能模糊查询")
     private fun checkUrlScheme(intent: Intent): Boolean {
         val packageManager: PackageManager = application.packageManager
         val activities = packageManager.queryIntentActivities(intent, 0)
