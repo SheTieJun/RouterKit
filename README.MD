@@ -122,6 +122,5 @@ class DefServiceImp:UserService,IModuleService
 SModuleServiceKit.getInstance().get<UserService>("defService")?.getName()
 ```
 
-### 版本更新
-#### 插件升级
-v 0.0.6 支持通过插件集成
+### 实现思路
+<img src="/art/路由组件和插件的实现过程.png" width="100%" height="auto"/>
