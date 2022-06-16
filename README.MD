@@ -11,53 +11,7 @@
 插件部分实现逻辑：[router_plugin](https://github.com/SheTieJun/router_plugin)
 > 大概思路：transform -> 扫描注解(SRouter和SModuleService) -> ASM(字节码插入到SRouterKit和SModuleServiceKit)->init初始化注册相关信息
 
-### 集成说明
-集成插件
-1. `build.gradle`
-```groovy
-maven { url 'https://jitpack.io' }
-```
-
-[![](https://jitpack.io/v/SheTieJun/router_plugin.svg)](https://jitpack.io/#SheTieJun/router_plugin)
-
-```groovy
-classpath 'com.github.SheTieJun:router_plugin:+'
-```
-
-2. `router`组件module
-
-[![](https://jitpack.io/v/SheTieJun/RouterKit.svg)](https://jitpack.io/#SheTieJun/RouterKit)
-
-```groovy
-api 'com.github.SheTieJun.RouterKit:router-annotation:+'
-api 'com.github.SheTieJun.RouterKit:router-kit:+'
-```
-
-或者通过过插件 （集成 v 0.0.6 以后）
-
-```groovy
-apply plugin: 'shetj.plugin.addRouter'
-```
-
-
-3. `app` 主模块
-
-```groovy
-apply plugin: 'com.android.application'
-apply plugin: 'shetj.plugin.scanRouter'
-```
-
-4. 其他功能模块`module`
-```groovy
-if (releaseConfig.Fun2isLibrary) {
-    //如果整个模块的功能要发布就当作一个lib
-    apply plugin: 'com.android.library'
-} else {
-    //否则把模块当成APP
-    apply plugin: 'com.android.application'
-    apply plugin: 'shetj.plugin.scanRouter'
-}
-```
+ 
 
 5. 需要路由的activity添加注解
 ```kotlin

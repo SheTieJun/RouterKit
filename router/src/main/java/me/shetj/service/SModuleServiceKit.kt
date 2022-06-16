@@ -4,7 +4,6 @@ import android.util.Log
 import me.shetj.exception.NoServiceFoundException
 import me.shetj.exception.ServiceAlreadyExistException
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 
 
 class SModuleServiceKit private constructor() {
@@ -111,7 +110,7 @@ class SModuleServiceKit private constructor() {
     @Suppress("UNCHECKED_CAST")
     private fun <T> createInstance(name: String): T {
         return findService(name).let { serviceName ->
-            Class.forName(serviceName).kotlin.createInstance() as T
+            Class.forName(serviceName).newInstance() as T
         }
     }
 

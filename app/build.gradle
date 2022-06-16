@@ -5,16 +5,17 @@ plugins {
 //    id 'shetj.plugin.addRouter'
 }
 
-android {
-    compileSdkVersion 30
+def artifactType = Attribute.of("artifactType", String.class)
+def minified = Attribute.of("minified", Boolean.class)
 
+android {
+    compileSdk 30
     defaultConfig {
         applicationId "me.shetj.routetkit"
-        minSdkVersion 21
-        targetSdkVersion 30
+        minSdk  21
+        targetSdk  30
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -30,19 +31,43 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
+    }
+}
+
+
+dependencies{
+    attributesSchema {
+        attribute(minified)
+    }
+    artifactTypes.getByName("jar") {
+        attributes.attribute(minified, false)
+    }
+
+}
+
+configurations.all {
+    afterEvaluate {
+        if (isCanBeResolved()) {
+            attributes.attribute(minified, true)
+        }
     }
 }
 
 dependencies {
+    project.dependencies.registerTransform(me.shetj.router.plugin.TreeTransform.class) {
+        it.from.attribute(minified, false).attribute(artifactType, "jar")
+        it.to.attribute(minified, true).attribute(artifactType, "jar")
+    }
+}
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"  //need
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version" //need
+
+dependencies {
     implementation 'androidx.core:core-ktx:1.5.0'
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'com.google.android.material:material:1.3.0'

@@ -1,16 +1,14 @@
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
-group = 'com.github.SheTieJun'
-version = '1.0.0'
-archivesBaseName = 'router-annotation'
-
-//upload
-////本地上传
-
-uploadArchives {
-    repositories.mavenDeployer {
-        //http://localhost:8080/maven/
-        repository(url: uri('../maven/shetj'))
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId "com.github.SheTieJun"
+                artifactId = 'router-annotation'
+                version = '1.0.0'
+            }
+        }
     }
 }
-
